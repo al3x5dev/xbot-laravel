@@ -1,0 +1,30 @@
+{
+    "name": "al3x5/xbot-laravel",
+    "description": "Laravel integration for xBot library",
+    "type": "library",
+    "require": {
+        "php": "^8.2",
+        "al3x5/xbot": "^2.3",
+        "al3x5/laravel-psr16-cache": "^1.0",
+        "laravel/framework": "^12.40"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Al3x5\\xBotLaravel\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "al3x5dev",
+            "email": "al3x5.dev@gmail.com"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Al3x5\\xBotLaravel\\xBotServiceProvider"
+            ]
+        }
+    }
+}

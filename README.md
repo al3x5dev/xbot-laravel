@@ -1,1 +1,1 @@
-# xbot-laravel
+# xBot-Laravel
