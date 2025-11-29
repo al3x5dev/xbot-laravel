@@ -17,16 +17,49 @@ class xBotCommand extends Command
     public function handle()
     {
         // Obtener los argumentos o usar 'install' por defecto
-        $args = $this->argument('args') ?: ['install'];
+        $args = $this->argument('args');
 
         $this->info("Running xBot: " . implode(' ', $args));
 
         // Lógica especial para instalación
-        if ($args[0] === 'install' && !file_exists(config_path('xbot.php'))) {
-            return $this->runInstallation();
+        if (empty($args)) {
+            if (!file_exists(config_path('xbot.php'))) {
+                return $this->runInstallation();
+            }
+
+            // Si está instalado, mostrar la lista de comandos de xBot
+            return $this->runxBotProcess(['list']);
         }
 
         // EJECUTAR TU CLI DE xBot INTERNAMENTE
+        return $this->runxBotProcess($args);
+    }
+
+    protected function runInstallation()
+    {
+        $this->info('🚀 Installing xBot for Laravel...');
+
+        // PASO 1: Configurar Laravel API (Sanctum)
+        $this->call('install:api');
+
+        // PASO 2: Publicar configuración de xBot
+        $this->call('vendor:publish', [
+            '--provider' => 'Al3x5\xBotLaravel\xBotServiceProvider',
+            '--tag' => 'xbot-config'
+        ]);
+
+        $this->info('✅ xBot Laravel dependencies installed!');
+        $this->line('');
+        $this->line('Next steps:');
+        $this->line('1. Configure your BOT_TOKEN in .env file');
+        $this->line('2. Run: php artisan xbot hook:set <your-webhook-url>');
+        $this->line('3. Create your first command: php artisan xbot telegram:command');
+
+        return 0;
+    }
+
+    public function runxBotProcess(array $args)
+    {
         $process = new Process([
             PHP_BINARY,              // Ejecuta PHP
             base_path('vendor/bin/xbot'),  // Tu CLI real
@@ -34,7 +67,8 @@ class xBotCommand extends Command
         ]);
 
         $process->setWorkingDirectory(base_path());
-        $process->setTimeout(300);
+        $process->setTty(Process::isTtySupported());
+        $process->setTimeout(0);
 
         // Mostrar output en tiempo real
         $process->run(function ($type, $buffer) {
@@ -42,67 +76,5 @@ class xBotCommand extends Command
         });
 
         return $process->isSuccessful() ? 0 : 1;
-    }
-
-    protected function runInstallation()
-    {
-        $this->info('Starting xBot installation for Laravel...');
-
-        // PASO 1: Configurar Laravel API
-        $this->call('install:api');
-        // Esto ejecuta: php artisan install:api internamente
-
-        // PASO 2: Publicar configuración de xBot
-        $this->call('vendor:publish', [
-            '--provider' => 'Al3x5\xBotLaravel\xBotServiceProvider',
-            '--tag' => 'xbot-config'
-        ]);
-        // Esto copia tu config/xbot.php al proyecto Laravel
-
-        // PASO 3: Ejecutar instalación interactiva de xBot
-        $process = new Process([PHP_BINARY, base_path('vendor/bin/xbot'), 'install']);
-        $process->setWorkingDirectory(base_path());
-        $process->setTty(Process::isTtySupported());
-        $process->setTimeout(0);
-
-        $process->run(function ($type, $buffer) {
-            $this->output->write($buffer);
-        });
-
-        // PASO 4: Adaptar configuración para Laravel
-        /*if (file_exists(base_path('config.php'))) {
-            $this->moveConfigToLaravel();
-        }*/
-
-        $this->info('✅ xBot installed successfully for Laravel!');
-        return 0;
-    }
-
-    protected function moveConfigToLaravel()
-    {
-        // Leer la configuración que generó tu CLI standalone
-        $standaloneConfig = include base_path('config.php');
-
-        // Crear contenido adaptado para Laravel
-        $laravelConfig = "<?php\n\nreturn [\n";
-
-        foreach ($standaloneConfig as $key => $value) {
-            if ($key === 'cache' && is_object($value)) {
-                // CONVERTIR: cache standalone → cache Laravel
-                $laravelConfig .= "    'cache' => new \\Al3x5\\LaravelPsr16Cache\\LaravelCache(app('cache')),\n";
-            } else {
-                // Mantener otros valores igual
-                $laravelConfig .= "    '{$key}' => " . var_export($value, true) . ",\n";
-            }
-        }
-
-        $laravelConfig .= "];\n";
-
-        // Guardar en la ubicación de Laravel
-        file_put_contents(config_path('xbot.php'), $laravelConfig);
-        // Eliminar el archivo standalone
-        unlink(base_path('config.php'));
-
-        $this->info('✅ Configuration adapted for Laravel and moved to config/xbot.php');
     }
 }
