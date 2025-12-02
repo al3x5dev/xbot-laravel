@@ -2,6 +2,7 @@
 
 namespace Al3x5\xBotLaravel\Commands;
 
+use Al3x5\xBot\Commands\InstallCommand;
 use Illuminate\Console\Command;
 use Symfony\Component\Process\Process;
 
@@ -48,12 +49,17 @@ class xBotCommand extends Command
             '--tag' => 'xbot-config'
         ]);
 
+        $xbotInstall = new InstallCommand();
+        $xbotInstall->makeCommandClasses(); // Crear las clases Start y Help
+        $xbotInstall->updateComposerAutoload(); // Actualizar composer.json y autoload
+
         $this->info('✅ xBot Laravel dependencies installed!');
         $this->line('');
         $this->line('Next steps:');
         $this->line('1. Configure your BOT_TOKEN in .env file');
         $this->line('2. Run: php artisan xbot hook:set <your-webhook-url>');
         $this->line('3. Create your first command: php artisan xbot telegram:command');
+        $this->line('4. Run: php artisan xbot register');
 
         return 0;
     }
