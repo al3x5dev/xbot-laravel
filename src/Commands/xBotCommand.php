@@ -50,6 +50,7 @@ class xBotCommand extends Command
         ]);
 
         $xbotInstall = new InstallCommand();
+        $xbotInstall->createDirectories();
         $xbotInstall->makeCommandClasses(); // Crear las clases Start y Help
         $xbotInstall->updateComposerAutoload(); // Actualizar composer.json y autoload
 
