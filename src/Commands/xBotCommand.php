@@ -15,9 +15,16 @@ class xBotCommand extends Command
     protected $signature = 'xbot {args?*}';
     protected $description = 'Run xBot commands through Laravel';
 
+    // Comandos que deben ejecutarse localmente en Laravel
+    private const LOCAL_COMMANDS = [
+        'hook:info',
+        'hook:set', 
+        'hook:delete',
+        'hook:about',
+    ];
+
     public function handle()
     {
-        // Obtener los argumentos o usar 'install' por defecto
         $args = $this->argument('args');
 
         $this->info("Running xBot: " . implode(' ', $args));
@@ -29,11 +36,19 @@ class xBotCommand extends Command
             }
 
             // Si está instalado, mostrar la lista de comandos de xBot
-            return $this->runxBotProcess(['list']);
+            return $this->runCliProcess(['list']);
         }
 
-        // EJECUTAR TU CLI DE xBot INTERNAMENTE
-        return $this->runxBotProcess($args);
+        // Obtener el primer argumento (el comando)
+        $command = $args[0];
+
+        // Verificar si es un comando local
+        if (in_array($command, self::LOCAL_COMMANDS)) {
+            return $this->runLocalCommand($command, array_slice($args, 1));
+        }
+
+        // Ejecutar a través del CLI standalone
+        return $this->runCliProcess($args);
     }
 
     protected function runInstallation()
@@ -65,7 +80,7 @@ class xBotCommand extends Command
         return 0;
     }
 
-    public function runxBotProcess(array $args)
+    public function runCliProcess(array $args)
     {
         $process = new Process([
             PHP_BINARY,              // Ejecuta PHP
@@ -83,5 +98,15 @@ class xBotCommand extends Command
         });
 
         return $process->isSuccessful() ? 0 : 1;
+    }
+
+    private function runLocalCommand(string $command, array $args = []): int
+    {
+        // Convertir hook:info -> xbot:hook:info
+        $artisanCommand = 'xbot:' . $command;
+        
+        // Ejecutar el comando Artisan directamente
+        // Laravel se encargará de pasar los argumentos correctamente
+        return $this->call($artisanCommand, $args);
     }
 }
