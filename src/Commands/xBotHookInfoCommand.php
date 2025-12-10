@@ -23,9 +23,9 @@ class xBotHookInfoCommand extends Command
             $bot = new Bot($config);
             $data = $bot->getWebhookInfo();
 
-            if ($data['ok']) {
-                foreach ($data['result'] as $key => $value) {
-                    $this->line(`<fg=green>$key:</> <fg=white>$value</>`);
+            if ($data->ok) {
+                foreach ($data->result as $key => $value) {
+                    $this->line("<fg=green>$key:</> <fg=white>$value</>");
                 }
 
                 return 0;

@@ -38,10 +38,10 @@ class xBotHookSetCommand extends Command
                 'drop_pending_updates' => true
             ]);
 
-            if ($data['ok']) {
-                $this->info('✅ Webhook set successfully!');
+            if ($data->ok && $data->result) {
+                $this->info('✅ '.$data->description);
             } else {
-                $this->error('❌ Failed to set webhook: ' . $data['description']);
+                $this->error('❌ Failed to set webhook: ' . $data->description);
                 return 1;
             }
         } catch (\Exception $e) {
