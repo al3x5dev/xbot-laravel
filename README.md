@@ -1,6 +1,6 @@
 # xBot Laravel
 
-Seamless integration of xBot [the powerful PHP library for creating Telegram bots](https://github.com/al3x5dev/xbot/) with the [Laravel framework](https://github.com/laravel/laravel).
+Seamless integration of [xBot](https://github.com/al3x5dev/xbot/) the powerful PHP library for creating Telegram bots with the [Laravel framework](https://github.com/laravel/laravel).
 
 
 ## 🚀 Features
