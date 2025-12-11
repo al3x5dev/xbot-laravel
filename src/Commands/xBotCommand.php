@@ -73,7 +73,7 @@ class xBotCommand extends Command
         $this->line('');
         $this->line('Next steps:');
         $this->line('1. Configure your BOT_TOKEN in .env file');
-        $this->line('2. Run: php artisan xbot hook:set <your-webhook-url>');
+        $this->line('2. Run: php artisan xbot:hook:set <your-webhook-url>');
         $this->line('3. Create your first command: php artisan xbot telegram:command');
         $this->line('4. Run: php artisan xbot register');
 

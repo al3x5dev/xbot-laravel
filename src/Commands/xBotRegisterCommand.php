@@ -11,6 +11,6 @@ class xBotRegisterCommand extends Command
 
     public function handle()
     {
-        return $this->call('xbot', ['registes']);
+        return $this->call('xbot', ['register']);
     }
 }

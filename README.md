@@ -40,7 +40,13 @@ php artisan xbot:hook:set https://yourdomain.com/xbot/webhook
 ### 3. Create Your First Command
 
 ```bash
-php artisan xbot command:create HelloWorld
+php artisan xbot telegram:command HelloWorld
+```
+
+### 4. Register all commands and callbacks
+
+```bash
+php artisan xbot register
 ```
 
 ## 🛠 Available Commands
