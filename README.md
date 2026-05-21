@@ -8,14 +8,17 @@ Seamless integration of [xBot](https://github.com/al3x5dev/xbot/) the powerful P
 - **Artisan Commands**: Use xBot through familiar Laravel commands
 - **Laravel Cache Integration**: Automatic PSR-16 adapter
 - **Laravel Configuration**: Native Laravel configuration system
-- **API Ready**: Automatic Laravel Sanctum configuration
+- **Dependency Injection**: Type-hint Bot in controllers for automatic injection
+- **Service Container**: Bot registered as singleton in Laravel container
 - **Webhook Management**: Easy webhook configuration for Telegram bots
+
 
 ## 📦 Installation
 
 ```bash
 composer require al3x5/xbot-laravel
 ```
+
 
 ## ⚡ Quick Start
 
@@ -31,11 +34,13 @@ This command will:
 - Guide you through setting up your bot
 - Adapt the configuration for your environment Laravel
 
+
 ### 2. Configure Webhook
 
 ```bash
 php artisan xbot:hook:set https://yourdomain.com/xbot/webhook
 ```
+
 
 ### 3. Create Your First Command
 
@@ -43,24 +48,41 @@ php artisan xbot:hook:set https://yourdomain.com/xbot/webhook
 php artisan xbot telegram:command HelloWorld
 ```
 
+
 ### 4. Register all commands and callbacks
 
 ```bash
 php artisan xbot register
 ```
 
+
 ## 🛠 Available Commands
 
-All commands available in [xBot](https://github.com/al3x5dev/xbot/blob/main/docs/cli.md), except `php vendor/bin/xbot install`. This command is replaced by `php artisan xbot`.
+| Command | Description |
+|---------|-------------|
+| `php artisan xbot` | Main command (install or proxy to xBot CLI) |
+| `php artisan xbot:hook:set <url>` | Set webhook URL |
+| `php artisan xbot:hook:delete` | Delete webhook |
+| `php artisan xbot:hook:info` | Get webhook info |
+| `php artisan xbot:hook:about` | Get bot info |
+| `php artisan xbot register` | Register all commands and callbacks |
+| `php artisan xbot telegram:command <name>` | Create new command |
+| `php artisan xbot telegram:callback <name>` | Create new callback handler |
+| `php artisan xbot telegram:conversation <name>` | Create new conversation |
+| `php artisan xbot telegram:handler <name>` | Create new handler |
+| `php artisan xbot telegram:middleware <name>` | Create new middleware |
 
 
 ## ⚙️ Settings
 
 After installation, add to your `.env`:
-```send
+```env
 BOT_TOKEN=1234567890:ABCDEFGHIJKLMNOQRSTZ
+BOT_SECRET=your_secret_key (optional)
 ADMIN_TELEGRAM_ID=123456789,985632147
+BOT_WEBHOOK_URL=https://yourdomain.com/bot (optional)
 ```
+
 
 ## 🌐 Webhook Route
 
@@ -71,39 +93,139 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/bot', function (Request $request) {
-    $bot = new Al3x5\xBot\Bot(config('xbot'));
+    $bot = app(\Al3x5\xBot\Bot::class);
     $bot->run();
 });
 ```
 
-## 🔧 Advanced Use
 
-### Custom Integration
+## 🔧 Dependency Injection
 
-Inject xBot services into your controllers:
+### Type-hinting in Controllers
+
+The Bot is registered as a singleton in Laravel's service container. You can inject it directly:
 
 ```php
-use H3x5\xBot\Bot;
+<?php
 
-public function sayHelloWorld(Request $request, Bot $bot)
+namespace App\Http\Controllers;
+
+use Al3x5\xBot\Bot;
+
+class TelegramController extends Controller
 {
-    return $bot->sendMessage([
-        'chat_id' => 'CHAT_ID',
-        'text' => 'Hello World' 
+    public function sendMessage(Bot $bot)
+    {
+        $bot->sendMessage([
+            'chat_id' => '123456789',
+            'text' => 'Hello from Laravel!'
         ]);
+
+        return response()->json(['status' => 'sent']);
+    }
 }
 ```
+
+
+### Using the Service Container
+
+```php
+use Al3x5\xBot\Bot;
+
+// Method 1: via type-hinting (recommended)
+public function myMethod(Bot $bot) { ... }
+
+// Method 2: via app() helper
+$bot = app(Bot::class);
+
+// Method 3: via alias 'xbot'
+$bot = app('xbot');
+```
+
+
+### Using Facade (if needed)
+
+Create a Facade in your Laravel app `app/Facades/Bot.php`:
+
+```php
+<?php
+
+namespace App\Facades;
+
+use Illuminate\Support\Facades\Facade;
+
+class Bot extends Facade
+{
+    protected static function getFacadeAccessor()
+    {
+        return \Al3x5\xBot\Bot::class;
+    }
+}
+```
+
+Then use: `Bot::sendMessage([...])`
+
+
+## 🎯 Usage Examples
+
+### Send a Message
+
+```php
+public function example(Bot $bot)
+{
+    $bot->sendMessage([
+        'chat_id' => '123456789',
+        'text' => 'Hello World!',
+        'parse_mode' => 'Markdown'
+    ]);
+}
+```
+
+
+### Send with Keyboard
+
+```php
+public function withKeyboard(Bot $bot)
+{
+    $bot->sendMessage([
+        'chat_id' => '123456789',
+        'text' => 'Choose an option:',
+        'reply_markup' => [
+            'inline_keyboard' => [
+                [['text' => 'Option 1', 'callback_data' => 'opt1']],
+                [['text' => 'Option 2', 'callback_data' => 'opt2']]
+            ]
+        ]
+    ]);
+}
+```
+
+
+### Answer Callback Query
+
+```php
+public function handleCallback(Bot $bot)
+{
+    $bot->answerCallbackQuery([
+        'callback_query_id' => $callback_query_id,
+        'text' => 'Action completed!'
+    ]);
+}
+```
+
 
 ## 📚 Requirements
 
 - PHP 8.2+
 - Laravel 12.x
-- xBot Library (automatically installed)
+- xBot Library v4 (automatically installed)
+
 
 ## 🆘 Support
 
 - [Documentation](https://github.com/al3x5dev/xbot/tree/main/docs)
 - [Issues](https://github.com/al3x5/xbot-laravel/issues)
+
 
 ## 📄 License
 

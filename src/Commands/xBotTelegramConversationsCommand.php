@@ -1,16 +1,23 @@
 <?php
 
-namespace Al3x5\XBotLaravel\Commands;
+namespace Al3x5\xBotLaravel\Commands;
 
 use Illuminate\Console\Command;
 
 class xBotTelegramConversationsCommand extends Command
 {
-    protected $signature = 'xbot:telegram:conversation';
+    protected $signature = 'xbot:telegram:conversation {name?}';
     protected $description = 'Create a new conversational flow in your bot';
 
     public function handle()
     {
-        return $this->call('xbot', ['telegram:conversation']);
+        $args = ['telegram:conversation'];
+        $name = $this->argument('name');
+
+        if ($name) {
+            $args[] = $name;
+        }
+
+        return $this->call('xbot', $args);
     }
 }

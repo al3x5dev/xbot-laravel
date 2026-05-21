@@ -12,6 +12,7 @@ use Al3x5\XBotLaravel\Commands\xBotTelegramCallbacksCommand;
 use Al3x5\XBotLaravel\Commands\xBotTelegramCommandsCommand;
 use Al3x5\XBotLaravel\Commands\xBotTelegramConversationsCommand;
 use Al3x5\XBotLaravel\Commands\xBotTelegramHandlerCommand;
+use Al3x5\xBot\Bot;
 use Illuminate\Support\ServiceProvider;
 
 class xBotServiceProvider extends ServiceProvider
@@ -43,9 +44,10 @@ class xBotServiceProvider extends ServiceProvider
         // Fusionar configuración
         $this->mergeConfigFrom(__DIR__ . '/../config/xbot.php', 'xbot');
 
-        // Registrar tu cache PSR-16
-        /*$this->app->bind('xbot.psr16.cache', function($app) {
-            return new \Al3x5\LaravelPsr16Cache\LaravelCache($app['cache']);
-        });*/
+        $this->app->singleton(Bot::class, function ($app) {
+            return new Bot(config('xbot'));
+        });
+
+        $this->app->alias(Bot::class, 'xbot');
     }
 }

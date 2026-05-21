@@ -27,16 +27,13 @@ class xBotHookSetCommand extends Command
 
         if (empty($config['token'])) {
             $this->error('❌ Bot token is not configured');
-            $this->line('Please add XBOT_TOKEN=your-token to your .env file');
+            $this->line('Please add BOT_TOKEN=your-token to your .env file');
             return 1;
         }
 
         try {
             $bot = new Bot($config);
-            $data = $bot->setWebhook([
-                'url' => $url,
-                'drop_pending_updates' => true
-            ]);
+            $data = $bot->setWebhook($url,drop_pending_updates:true);
 
             $this->info('✅ ' . $data);
             return 0;
