@@ -8,10 +8,11 @@ use Al3x5\xBotLaravel\Commands\xBotHookDeleteCommand;
 use Al3x5\xBotLaravel\Commands\xBotHookInfoCommand;
 use Al3x5\xBotLaravel\Commands\xBotHookSetCommand;
 use Al3x5\xBotLaravel\Commands\xBotRegisterCommand;
-use Al3x5\XBotLaravel\Commands\xBotTelegramCallbacksCommand;
-use Al3x5\XBotLaravel\Commands\xBotTelegramCommandsCommand;
-use Al3x5\XBotLaravel\Commands\xBotTelegramConversationsCommand;
-use Al3x5\XBotLaravel\Commands\xBotTelegramHandlerCommand;
+use Al3x5\xBotLaravel\Commands\xBotTelegramCallbacksCommand;
+use Al3x5\xBotLaravel\Commands\xBotTelegramCommandsCommand;
+use Al3x5\xBotLaravel\Commands\xBotTelegramConversationsCommand;
+use Al3x5\xBotLaravel\Commands\xBotTelegramHandlerCommand;
+use Al3x5\LaravelPsr16Cache;
 use Al3x5\xBot\Bot;
 use Illuminate\Support\ServiceProvider;
 
@@ -45,7 +46,9 @@ class xBotServiceProvider extends ServiceProvider
         $this->mergeConfigFrom(__DIR__ . '/../config/xbot.php', 'xbot');
 
         $this->app->singleton(Bot::class, function ($app) {
-            return new Bot(config('xbot'));
+            $config = config('xbot');
+            $config['cache'] = new LaravelPsr16Cache($app['cache']->store());
+            return new Bot($config);
         });
 
         $this->app->alias(Bot::class, 'xbot');
