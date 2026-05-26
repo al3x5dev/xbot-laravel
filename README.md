@@ -31,28 +31,33 @@ php artisan xbot
 This command will:
 - Configure the Laravel API (Sanctum)
 - Publish the xBot configuration
-- Guide you through setting up your bot
-- Adapt the configuration for your environment Laravel
+- Create bot directory structure (commands, callbacks, middlewares)
+- Create default command classes (Start, Help)
+- Generate middleware configuration
 
+### 2. Configure your Bot
 
-### 2. Configure Webhook
-
-```bash
-php artisan xbot:hook:set https://yourdomain.com/xbot/webhook
+Add to your `.env` file:
+```env
+BOT_TOKEN=1234567890:ABCDEFGHIJKLMNOQRSTZ
 ```
 
-
-### 3. Create Your First Command
+### 3. Register default commands and callback functions
 
 ```bash
-php artisan xbot telegram:command HelloWorld
+php artisan xbot:register
 ```
 
-
-### 4. Register all commands and callbacks
+### 4. Configure Webhook
 
 ```bash
-php artisan xbot register
+php artisan xbot:hook:set https://yourdomain.com/xbot/api/webhook
+```
+
+### 5. Create Your Commands
+
+```bash
+php artisan xbot:telegram:command HelloWorld
 ```
 
 
@@ -60,17 +65,17 @@ php artisan xbot register
 
 | Command | Description |
 |---------|-------------|
-| `php artisan xbot` | Main command (install or proxy to xBot CLI) |
+| `php artisan xbot` | Install and configure xBot |
+| `php artisan xbot:register` | Register all commands and callbacks |
 | `php artisan xbot:hook:set <url>` | Set webhook URL |
 | `php artisan xbot:hook:delete` | Delete webhook |
 | `php artisan xbot:hook:info` | Get webhook info |
 | `php artisan xbot:hook:about` | Get bot info |
-| `php artisan xbot register` | Register all commands and callbacks |
-| `php artisan xbot telegram:command <name>` | Create new command |
-| `php artisan xbot telegram:callback <name>` | Create new callback handler |
-| `php artisan xbot telegram:conversation <name>` | Create new conversation |
-| `php artisan xbot telegram:handler <name>` | Create new handler |
-| `php artisan xbot telegram:middleware <name>` | Create new middleware |
+| `php artisan xbot:telegram:command <name>` | Create new command |
+| `php artisan xbot:telegram:callback <name> <action>` | Create new callback handler |
+| `php artisan xbot:telegram:conversation <name>` | Create new conversation |
+| `php artisan xbot:telegram:handler <name>` | Create new handler |
+| `php artisan xbot:telegram:middleware <name>` | Create new middleware |
 
 
 ## ⚙️ Settings
@@ -93,8 +98,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::post('/bot', function (Request $request) {
-    $bot = app(\Al3x5\xBot\Bot::class);
-    $bot->run();
+    app('xbot')->run();
 });
 ```
 
@@ -116,10 +120,10 @@ class TelegramController extends Controller
 {
     public function sendMessage(Bot $bot)
     {
-        $bot->sendMessage([
-            'chat_id' => '123456789',
-            'text' => 'Hello from Laravel!'
-        ]);
+        $bot->sendMessage(
+            chat_id: '123456789',
+            text: 'Hello from Laravel!'
+        );
 
         return response()->json(['status' => 'sent']);
     }
@@ -135,12 +139,14 @@ use Al3x5\xBot\Bot;
 // Method 1: via type-hinting (recommended)
 public function myMethod(Bot $bot) { ... }
 
-// Method 2: via app() helper
-$bot = app(Bot::class);
-
-// Method 3: via alias 'xbot'
+// Method 2: via alias 'xbot' (recommended)
 $bot = app('xbot');
+
+// Method 3: via app() helper
+$bot = app(Bot::class);
 ```
+
+> **Note:** Always use `app('xbot')` or `app(Bot::class)` instead of `new Bot(...)`. The singleton handles Laravel cache integration automatically.
 
 
 ### Using Facade (if needed)
@@ -173,11 +179,10 @@ Then use: `Bot::sendMessage([...])`
 ```php
 public function example(Bot $bot)
 {
-    $bot->sendMessage([
-        'chat_id' => '123456789',
-        'text' => 'Hello World!',
-        'parse_mode' => 'Markdown'
-    ]);
+    $bot->sendMessage(
+        chat_id:'123456789',
+        text:'Hello World!'
+    );
 }
 ```
 
@@ -187,16 +192,20 @@ public function example(Bot $bot)
 ```php
 public function withKeyboard(Bot $bot)
 {
-    $bot->sendMessage([
-        'chat_id' => '123456789',
-        'text' => 'Choose an option:',
-        'reply_markup' => [
-            'inline_keyboard' => [
-                [['text' => 'Option 1', 'callback_data' => 'opt1']],
-                [['text' => 'Option 2', 'callback_data' => 'opt2']]
-            ]
-        ]
-    ]);
+    use Al3x5\xBot\Telegram\Factorys\InlineButton;
+    use ;
+
+    $keyboard = Al3x5\xBot\Telegram\Factorys\Keyboard::inline()
+    ->row([
+        Al3x5\xBot\Telegram\Factorys\InlineButton::make('👥 Community')
+        ->url('https://t.me/myGroup')
+    ])->build();
+
+    $bot->sendMessage(
+        chat_id:'123456789',
+        text:'Join my group!',
+        reply_markup:$keyboard
+    );
 }
 ```
 
@@ -206,10 +215,10 @@ public function withKeyboard(Bot $bot)
 ```php
 public function handleCallback(Bot $bot)
 {
-    $bot->answerCallbackQuery([
-        'callback_query_id' => $callback_query_id,
-        'text' => 'Action completed!'
-    ]);
+    $bot->answerCallbackQuery(
+        callback_query_id:$callback_query_id,
+        text:'Action completed!'
+    );
 }
 ```
 
