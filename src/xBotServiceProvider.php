@@ -12,6 +12,7 @@ use Al3x5\xBotLaravel\Commands\xBotTelegramCallbacksCommand;
 use Al3x5\xBotLaravel\Commands\xBotTelegramCommandsCommand;
 use Al3x5\xBotLaravel\Commands\xBotTelegramConversationsCommand;
 use Al3x5\xBotLaravel\Commands\xBotTelegramHandlerCommand;
+use Al3x5\xBotLaravel\Commands\xBotTelegramMiddlewareCommand;
 use Al3x5\LaravelPsr16Cache;
 use Al3x5\xBot\Bot;
 use Illuminate\Support\ServiceProvider;
@@ -36,6 +37,7 @@ class xBotServiceProvider extends ServiceProvider
             xBotTelegramCallbacksCommand::class,
             xBotTelegramConversationsCommand::class,
             xBotTelegramHandlerCommand::class,
+            xBotTelegramMiddlewareCommand::class,
             xBotTelegramCommandsCommand::class
         ]);
     }

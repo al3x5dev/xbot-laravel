@@ -2,22 +2,44 @@
 
 namespace Al3x5\xBotLaravel\Commands;
 
+use Al3x5\xBot\Commands\Traits\MakeClass;
 use Illuminate\Console\Command;
 
 class xBotTelegramCallbacksCommand extends Command
 {
-    protected $signature = 'xbot:telegram:callback {name?}';
+    use MakeClass;
+
+    protected $signature = 'xbot:telegram:callback {name?} {action?}';
     protected $description = 'Create a new Telegram callback';
 
-    public function handle()
+    public function handle(): int
     {
-        $args = ['telegram:callback'];
         $name = $this->argument('name');
-
-        if ($name) {
-            $args[] = $name;
+        if (empty($name)) {
+            $name = $this->ask('Callback class name (supports subdirs: Games/Dice)');
+            if (empty($name)) {
+                $this->error('Name cannot be empty.');
+                return 1;
+            }
         }
 
-        return $this->call('xbot', $args);
+        $action = $this->argument('action');
+        if (empty($action)) {
+            $action = $this->ask('Callback action name (e.g. play, join, confirm)');
+            if (empty($action)) {
+                $this->error('Action cannot be empty.');
+                return 1;
+            }
+        }
+
+        $data = $this->makeDir($name, 'bot/Callbacks', $this->output);
+        if (empty($data)) {
+            return 1;
+        }
+
+        $this->makeCallback($data, $action);
+        $this->info("Telegram callback [{$data['filename']}] created successfully.");
+
+        return 0;
     }
 }

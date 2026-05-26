@@ -4,7 +4,6 @@ namespace Al3x5\xBotLaravel\Commands;
 
 use Al3x5\xBot\Commands\InstallCommand;
 use Illuminate\Console\Command;
-use Symfony\Component\Process\Process;
 
 /**
  * Proxy de comandos 
@@ -18,7 +17,7 @@ class xBotCommand extends Command
     // Comandos que deben ejecutarse localmente en Laravel
     private const LOCAL_COMMANDS = [
         'hook:info',
-        'hook:set', 
+        'hook:set',
         'hook:delete',
         'hook:about',
     ];
@@ -27,16 +26,26 @@ class xBotCommand extends Command
     {
         $args = $this->argument('args');
 
-        $this->info("Running xBot: " . implode(' ', $args));
-
+        
         // Lógica especial para instalación
         if (empty($args)) {
             if (!file_exists(config_path('xbot.php'))) {
                 return $this->runInstallation();
             }
 
-            // Si está instalado, mostrar la lista de comandos de xBot
-            return $this->runCliProcess(['list']);
+            $this->info('xBot is installed. Available commands:');
+            $this->line('  php artisan xbot:register');
+            $this->line('  php artisan xbot:hook:set <url>');
+            $this->line('  php artisan xbot:hook:delete');
+            $this->line('  php artisan xbot:hook:info');
+            $this->line('  php artisan xbot:hook:about');
+            $this->line('  php artisan xbot:telegram:command <name>');
+            $this->line('  php artisan xbot:telegram:callback <name> <action>');
+            $this->line('  php artisan xbot:telegram:conversation <name>');
+            $this->line('  php artisan xbot:telegram:handler <name>');
+            $this->line('  php artisan xbot:telegram:middleware <name>');
+
+            return 0;
         }
 
         // Obtener el primer argumento (el comando)
@@ -47,18 +56,19 @@ class xBotCommand extends Command
             return $this->runLocalCommand($command, array_slice($args, 1));
         }
 
-        // Ejecutar a través del CLI standalone
-        return $this->runCliProcess($args);
+        $this->error("Unknown xBot command: $command");
+        $this->line('Run php artisan xbot to see available commands.');
+        return 1;
     }
 
     protected function runInstallation()
     {
-        $this->info('🚀 Installing xBot for Laravel...');
+        $this->info('Installing xBot for Laravel...');
 
-        // PASO 1: Configurar Laravel API (Sanctum)
+        // Configurar Laravel API (Sanctum)
         $this->call('install:api');
 
-        // PASO 2: Publicar configuración de xBot
+        // Publicar configuración de xBot
         $this->call('vendor:publish', [
             '--provider' => 'Al3x5\xBotLaravel\xBotServiceProvider',
             '--tag' => 'xbot-config'
@@ -66,12 +76,14 @@ class xBotCommand extends Command
 
         $xbotInstall = new InstallCommand();
         $xbotInstall->createDirectories();
-        $xbotInstall->makeCommandClasses(); // Crear las clases Start y Help
-        $xbotInstall->updateComposerAutoload(); // Actualizar composer.json y autoload
+        // Crear las clases Start y Help
+        $xbotInstall->makeCommandClasses();
+        // Actualizar composer.json y autoload
+        $xbotInstall->updateComposerAutoload();
 
-        $this->runCliProcess(['register']); // crea los archivos de registro .json
+        $this->call('xbot:register');
 
-        $this->info('✅ xBot Laravel dependencies installed!');
+        $this->info('xBot Laravel dependencies installed!');
         $this->line('');
         $this->line('Next steps:');
         $this->line('1. Configure your BOT_TOKEN in .env file');
@@ -82,33 +94,18 @@ class xBotCommand extends Command
         return 0;
     }
 
-    public function runCliProcess(array $args)
-    {
-        $process = new Process([
-            PHP_BINARY,              // Ejecuta PHP
-            base_path('vendor/bin/xbot'),  // Tu CLI real
-            ...$args                 // Los mismos argumentos que recibió Artisan
-        ]);
-
-        $process->setWorkingDirectory(base_path());
-        $process->setTty(Process::isTtySupported());
-        $process->setTimeout(0);
-
-        // Mostrar output en tiempo real
-        $process->run(function ($type, $buffer) {
-            $this->output->write($buffer);
-        });
-
-        return $process->isSuccessful() ? 0 : 1;
-    }
-
     private function runLocalCommand(string $command, array $args = []): int
     {
         // Convertir hook:info -> xbot:hook:info
         $artisanCommand = 'xbot:' . $command;
-        
+
+        $mapped = [];
+        foreach ($args as $i => $arg) {
+            $mapped[$i === 0 ? 'url' : 'arg' . $i] = $arg;
+        }
+
         // Ejecutar el comando Artisan directamente
         // Laravel se encargará de pasar los argumentos correctamente
-        return $this->call($artisanCommand, $args);
+        return $this->call($artisanCommand, $mapped);
     }
 }
