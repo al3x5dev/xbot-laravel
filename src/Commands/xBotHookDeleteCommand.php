@@ -26,9 +26,9 @@ class xBotHookDeleteCommand extends Command
             }
 
             $bot = new Bot($config);
-            $data = $bot->deleteWebhook(['drop_pending_updates' => true]);
+            $data = $bot->deleteWebhook(drop_pending_updates: true);
 
-                $this->info('✅ ' . $data);
+                $this->info('✅ Webhook was deleted');
                 return 0;
         } catch (\Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());

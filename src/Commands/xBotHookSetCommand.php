@@ -35,7 +35,7 @@ class xBotHookSetCommand extends Command
             $bot = new Bot($config);
             $data = $bot->setWebhook($url,drop_pending_updates:true);
 
-            $this->info('✅ ' . $data);
+            $this->info('✅ Webhook was set');
             return 0;
         } catch (\Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());

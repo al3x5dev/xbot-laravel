@@ -23,16 +23,11 @@ class xBotHookAboutCommand extends Command
             $bot = new Bot($config);
             $data = $bot->getMe();
 
-            if ($data->ok) {
-                foreach ($data->result as $key => $value) {
-                    $this->line("<fg=green>$key:</> <fg=white>$value</>");
-                }
-
-                return 0;
-            } else {
-                $this->error('❌ Failed to get bot info: ' . $data['description']);
-                return 1;
+            foreach ($data->getProperties() as $key => $value) {
+                $this->line("<fg=green>$key:</> <fg=white>$value</>");
             }
+
+            return 0;
         } catch (\Exception $e) {
             $this->error('❌ Error: ' . $e->getMessage());
             return 1;
