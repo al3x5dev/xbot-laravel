@@ -76,9 +76,9 @@ class xBotCommand extends Command
 
         $xbotInstall = new InstallCommand();
         $xbotInstall->createDirectories();
-        // Crear las clases Start y Help
+        $xbotInstall->mwConfig();
+        $xbotInstall->loggerMiddleware();
         $xbotInstall->makeCommandClasses();
-        // Actualizar composer.json y autoload
         $xbotInstall->updateComposerAutoload();
 
         $this->info('xBot Laravel dependencies installed!');
