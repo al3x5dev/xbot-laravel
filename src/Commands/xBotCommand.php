@@ -81,8 +81,6 @@ class xBotCommand extends Command
         // Actualizar composer.json y autoload
         $xbotInstall->updateComposerAutoload();
 
-        $this->call('xbot:register');
-
         $this->info('xBot Laravel dependencies installed!');
         $this->line('');
         $this->line('Next steps:');
