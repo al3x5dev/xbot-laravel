@@ -33,7 +33,7 @@ class xBotHookSetCommand extends Command
 
         try {
             $bot = new Bot($config);
-            $data = $bot->setWebhook($url,drop_pending_updates:true);
+            $data = $bot->setWebhook($url, drop_pending_updates: true, secret_token: $config['secret'] ?? null);
 
             $this->info('✅ Webhook was set');
             return 0;
