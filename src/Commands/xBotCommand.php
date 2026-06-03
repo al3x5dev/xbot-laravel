@@ -2,6 +2,7 @@
 
 namespace Al3x5\xBotLaravel\Commands;
 
+use Al3x5\xBot\Bot;
 use Al3x5\xBot\Commands\InstallCommand;
 use Illuminate\Console\Command;
 
@@ -33,7 +34,9 @@ class xBotCommand extends Command
                 return $this->runInstallation();
             }
 
-            $this->info('xBot is installed. Available commands:');
+            $app = Bot::NAME.' v'.Bot::VERSION;
+
+            $this->info("$app is installed. Available commands");
             $this->line('  php artisan xbot:register');
             $this->line('  php artisan xbot:hook:set <url>');
             $this->line('  php artisan xbot:hook:delete');
