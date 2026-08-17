@@ -4,9 +4,9 @@
     "type": "library",
     "require": {
         "php": ">=8.2",
-        "al3x5/xbot": "*",
-        "al3x5/laravel-psr16-cache": "*",
-        "laravel/framework": "*"
+        "al3x5/xbot": ">=4.0",
+        "al3x5/laravel-psr16-cache": ">=1.0",
+        "laravel/framework": ">=12.0"
     },
     "license": "MIT",
     "autoload": {
