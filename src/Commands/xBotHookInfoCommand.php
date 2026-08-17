@@ -2,7 +2,6 @@
 
 namespace Al3x5\xBotLaravel\Commands;
 
-use Al3x5\xBot\Bot;
 use Illuminate\Console\Command;
 
 class xBotHookInfoCommand extends Command
@@ -10,17 +9,14 @@ class xBotHookInfoCommand extends Command
     protected $signature = 'xbot:hook:info';
     protected $description = "Gets information about the Telegram bot's webhook";
 
+    use ValidatesBotToken;
+
     public function handle()
     {
-        $config = config('xbot');
-
-        if (empty($config['token'])) {
-            $this->error('❌ Bot token is not configured');
-            return 1;
-        }
+        $this->ensureBotToken();
 
         try {
-            $bot = new Bot($config);
+            $bot = app('xbot');
             $data = $bot->getWebhookInfo();
 
             foreach ($data->getProperties() as $key => $value) {

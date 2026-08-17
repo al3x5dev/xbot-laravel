@@ -2,7 +2,6 @@
 
 namespace Al3x5\xBotLaravel\Commands;
 
-use Al3x5\xBot\Bot;
 use Illuminate\Console\Command;
 
 class xBotHookSetCommand extends Command
@@ -10,10 +9,11 @@ class xBotHookSetCommand extends Command
     protected $signature = 'xbot:hook:set {url?}';
     protected $description = 'Set up the webhook for the Telegram bot from Laravel';
 
+    use ValidatesBotToken;
+
     public function handle()
     {
         $url = $this->argument('url');
-        $config = config('xbot');
 
         if (empty($url)) {
             $url = $this->ask('What is the URL for sending updates?');
@@ -25,15 +25,11 @@ class xBotHookSetCommand extends Command
             return 1;
         }
 
-        if (empty($config['token'])) {
-            $this->error('❌ Bot token is not configured');
-            $this->line('Please add BOT_TOKEN=your-token to your .env file');
-            return 1;
-        }
+        $this->ensureBotToken();
 
         try {
-            $bot = new Bot($config);
-            $data = $bot->setWebhook($url, drop_pending_updates: true, secret_token: $config['secret'] ?? null);
+            $bot = app('xbot');
+            $data = $bot->setWebhook($url, drop_pending_updates: true, secret_token: config('xbot.secret'));
 
             $this->info('✅ Webhook was set');
             return 0;
